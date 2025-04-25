@@ -54,7 +54,7 @@ def compute_similarity(df):
         return cosine_similarity(matrix)
     except Exception as e:
         st.error(f"❌ Error computing similarity: {e}")
-        return []
+        return None
 
 def recommend(movie_title, df, similarity_matrix):
     """Get movie recommendations based on cosine similarity."""
@@ -109,7 +109,7 @@ if not movies.empty and 'title' in movies.columns:
     else:
         similarity = compute_similarity(filtered_movies)
 
-        if similarity:
+        if similarity is not None:
             selected_movie = st.selectbox("🎞️ Choose a movie to get recommendations:", sorted(filtered_movies['title'].unique()))
 
             if st.button("✨ Recommend"):
@@ -133,6 +133,6 @@ if not movies.empty and 'title' in movies.columns:
                 else:
                     st.warning("⚠️ No recommendations found.")
         else:
-            st.error("❌ Could not compute similarity matrix. Please try again.")
+            st.error("❌ Similarity matrix could not be computed. Please check the data and try again.")
 else:
     st.warning("⚠️ Dataset is empty or invalid.")

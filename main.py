@@ -44,17 +44,14 @@ def recommend(movie_title, df, similarity_matrix):
         st.error("❌ Selected movie not found.")
         return []
 
-# Session state for showing recommendations
 if 'show' not in st.session_state:
     st.session_state['show'] = False
 
-# Load data
 movies = load_data()
 
 if not movies.empty and 'title' in movies.columns:
-    # Genre extraction
     all_genres = sorted({genre.strip() for genres in movies['genre'].dropna() for genre in genres.split(',')})
-
+    
     st.title("🎬 Smart Movie Recommender")
     st.caption("Built with love by Asif")
 
@@ -64,10 +61,18 @@ if not movies.empty and 'title' in movies.columns:
 
     # Apply filters
     filtered_movies = movies.copy()
+
+    # Convert 'rating' column to numeric, coercing errors
+    filtered_movies['rating'] = pd.to_numeric(filtered_movies['rating'], errors='coerce')
+
+    # Drop rows with missing or invalid ratings
+    filtered_movies = filtered_movies.dropna(subset=['rating'])
+
     if selected_genres:
         filtered_movies = filtered_movies[filtered_movies['genre'].apply(
-            lambda x: isinstance(x, str) and any(genre.strip() in x for genre in selected_genres)
+            lambda x: any(genre.strip() in x for genre in selected_genres)
         )]
+    
     filtered_movies = filtered_movies[filtered_movies['rating'] >= min_rating]
 
     if filtered_movies.empty:
@@ -80,7 +85,7 @@ if not movies.empty and 'title' in movies.columns:
             st.session_state['show'] = True
 
         if st.session_state['show']:
-            st.subheader("🎯 You may also like:")
+            st.subheader("You may also like:")
 
             recommendations = recommend(selected_movie, filtered_movies, similarity)
 

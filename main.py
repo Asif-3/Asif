@@ -33,7 +33,12 @@ def compute_similarity(df):
 
 def recommend(movie_title, df, similarity_matrix):
     try:
-        idx = df[df['title'] == movie_title].index[0]
+        # Normalize the movie title to handle spaces and case differences
+        normalized_title = movie_title.strip().lower()
+        df['normalized_title'] = df['title'].str.strip().str.lower()
+
+        # Find the movie index by matching the normalized title
+        idx = df[df['normalized_title'] == normalized_title].index[0]
         distances = list(enumerate(similarity_matrix[idx]))
         sorted_distances = sorted(distances, key=lambda x: x[1], reverse=True)[1:6]
         return [
